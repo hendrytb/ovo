@@ -1,0 +1,679 @@
+use 'godoc cmd/github.com/kh411d/ovo' for documentation on the github.com/kh411d/ovo command 
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/kh411d/ovo"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#GetErrCode">func GetErrCode(e error) int</a></dd>
+			
+				
+				<dd><a href="#GetErrMsg">func GetErrMsg(e error) string</a></dd>
+			
+			
+				
+				<dd><a href="#Client">type Client</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#New">func New(baseURL, apiKey, appID, merchantID string) *Client</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CalculatePoints">func (client *Client) CalculatePoints(customerID string, params Params) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CheckCustomerAuthenticationStatus">func (client *Client) CheckCustomerAuthenticationStatus(authenticationID string) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CheckTransactionStatus">func (client *Client) CheckTransactionStatus(customerID string, transactionID interface{}) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CreateCustomerLinkage">func (client *Client) CreateCustomerLinkage(customerID string, params Params) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CreateTransaction">func (client *Client) CreateTransaction(customerID string, params Params) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.CustomerAuthentication">func (client *Client) CustomerAuthentication(params Params) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.GetCustomerProfile">func (client *Client) GetCustomerProfile(customerID string) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.GetCustomerProfileQR">func (client *Client) GetCustomerProfileQR(merchantID, storeID, terminalID string) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.GetMMsdk">func (client *Client) GetMMsdk(db *sql.DB) *MatahariMall</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Client.VoidTransaction">func (client *Client) VoidTransaction(customerID, transactionID string, params Params) ([]byte, error)</a></dd>
+				
+			
+				
+				<dd><a href="#CustomerOvo">type CustomerOvo</a></dd>
+				
+				
+			
+				
+				<dd><a href="#MatahariMall">type MatahariMall</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#MatahariMall.CheckOvoStatus">func (c *MatahariMall) CheckOvoStatus(customerID int64) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#MatahariMall.ValidateOvoIDAndAuthenticateToOvo">func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *OvoRequest) error</a></dd>
+				
+			
+				
+				<dd><a href="#OvoError">type OvoError</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OvoError.Error">func (e *OvoError) Error() string</a></dd>
+				
+			
+				
+				<dd><a href="#OvoRequest">type OvoRequest</a></dd>
+				
+				
+			
+				
+				<dd><a href="#OvoResponse">type OvoResponse</a></dd>
+				
+				
+			
+				
+				<dd><a href="#OvoResponseData">type OvoResponseData</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Params">type Params</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/kh411d/ovo/api.go">api.go</a>
+			
+				<a href="/src/github.com/kh411d/ovo/client.go">client.go</a>
+			
+				<a href="/src/github.com/kh411d/ovo/const.go">const.go</a>
+			
+				<a href="/src/github.com/kh411d/ovo/err.go">err.go</a>
+			
+				<a href="/src/github.com/kh411d/ovo/mm.go">mm.go</a>
+			
+				<a href="/src/github.com/kh411d/ovo/type.go">type.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const (
+
+    <span class="comment">//MerchantIDMustNotEmpty : OVO merchant_id must not empty</span>
+    <span id="MerchantIDMustNotEmpty">MerchantIDMustNotEmpty</span> = 2
+    <span class="comment">//PhoneMustNotEmpty : OVO phone must not empty</span>
+    <span id="PhoneMustNotEmpty">PhoneMustNotEmpty</span> = 3
+    <span class="comment">//CustomerNotFound : OVO customer not found</span>
+    <span id="CustomerNotFound">CustomerNotFound</span> = 4
+)</pre>
+				
+			
+				<pre>const (
+    <span class="comment">//Authenticated : OVO check auth status is authenticated</span>
+    <span id="Authenticated">Authenticated</span> = 1
+    <span class="comment">//Unauthenticated : OVO check auth status is not authenticated</span>
+    <span id="Unauthenticated">Unauthenticated</span> = 2
+    <span class="comment">//AuthIDNotFound : OVO check auth status authentication_id is not found</span>
+    <span id="AuthIDNotFound">AuthIDNotFound</span> = 3
+)</pre>
+				
+			
+				<pre>const (
+    <span class="comment">//NoErrCode : No Error code is set</span>
+    <span id="NoErrCode">NoErrCode</span> = 0
+)</pre>
+				
+			
+		
+		
+		
+			
+			
+			<h2 id="GetErrCode">func <a href="/src/target/err.go?s=136:164#L1">GetErrCode</a>
+				<a class="permalink" href="#GetErrCode">&#xb6;</a>
+			</h2>
+			<pre>func GetErrCode(e <a href="/pkg/builtin/#error">error</a>) <a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+GetErrCode : Get OVO error code
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetErrMsg">func <a href="/src/target/err.go?s=285:315#L8">GetErrMsg</a>
+				<a class="permalink" href="#GetErrMsg">&#xb6;</a>
+			</h2>
+			<pre>func GetErrMsg(e <a href="/pkg/builtin/#error">error</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			<p>
+GetErrMsg : Get OVO error message
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Client">type <a href="/src/target/type.go?s=98:252#L1">Client</a>
+				<a class="permalink" href="#Client">&#xb6;</a>
+			</h2>
+			<pre>type Client struct {
+    BaseURL    <a href="/pkg/builtin/#string">string</a>
+    APIKey     <a href="/pkg/builtin/#string">string</a>
+    AppID      <a href="/pkg/builtin/#string">string</a>
+    MerchantID <a href="/pkg/builtin/#string">string</a>
+    Random     <a href="/pkg/builtin/#string">string</a>
+    Hmac       <a href="/pkg/builtin/#string">string</a>
+}</pre>
+			<p>
+Client : Contstructor for OVO Client/App
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="New">func <a href="/src/target/client.go?s=254:313#L10">New</a>
+					<a class="permalink" href="#New">&#xb6;</a>
+				</h3>
+				<pre>func New(baseURL, apiKey, appID, merchantID <a href="/pkg/builtin/#string">string</a>) *<a href="#Client">Client</a></pre>
+				<p>
+New : Constructor for OVO Client / App
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Client.CalculatePoints">func (*Client) <a href="/src/target/api.go?s=850:937#L26">CalculatePoints</a>
+					<a class="permalink" href="#Client.CalculatePoints">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CalculatePoints(customerID <a href="/pkg/builtin/#string">string</a>, params <a href="#Params">Params</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalculatePoints : Calculate Points
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.CheckCustomerAuthenticationStatus">func (*Client) <a href="/src/target/api.go?s=3940:4036#L163">CheckCustomerAuthenticationStatus</a>
+					<a class="permalink" href="#Client.CheckCustomerAuthenticationStatus">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CheckCustomerAuthenticationStatus(authenticationID <a href="/pkg/builtin/#string">string</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CheckCustomerAuthenticationStatus : Check Customer Authentication Status
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.CheckTransactionStatus">func (*Client) <a href="/src/target/api.go?s=1881:1987#L74">CheckTransactionStatus</a>
+					<a class="permalink" href="#Client.CheckTransactionStatus">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CheckTransactionStatus(customerID <a href="/pkg/builtin/#string">string</a>, transactionID interface{}) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CheckTransactionStatus : Check Push to Pay / Scan To Pay Transaction Status
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.CreateCustomerLinkage">func (*Client) <a href="/src/target/api.go?s=2849:2942#L114">CreateCustomerLinkage</a>
+					<a class="permalink" href="#Client.CreateCustomerLinkage">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CreateCustomerLinkage(customerID <a href="/pkg/builtin/#string">string</a>, params <a href="#Params">Params</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CreateCustomerLinkage : Customer Creation / Linkage
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.CreateTransaction">func (*Client) <a href="/src/target/api.go?s=1356:1445#L50">CreateTransaction</a>
+					<a class="permalink" href="#Client.CreateTransaction">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CreateTransaction(customerID <a href="/pkg/builtin/#string">string</a>, params <a href="#Params">Params</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CreateTransaction : Create Push to Pay / Scan to Pay Transaction
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.CustomerAuthentication">func (*Client) <a href="/src/target/api.go?s=3441:3516#L138">CustomerAuthentication</a>
+					<a class="permalink" href="#Client.CustomerAuthentication">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) CustomerAuthentication(params <a href="#Params">Params</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CustomerAuthentication : Customer authentication, this API will push notification to customer device and open “Input Security Code” screen.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.GetCustomerProfile">func (*Client) <a href="/src/target/api.go?s=57:132#L1">GetCustomerProfile</a>
+					<a class="permalink" href="#Client.GetCustomerProfile">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) GetCustomerProfile(customerID <a href="/pkg/builtin/#string">string</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetCustomerProfile : Get Customer Profile
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.GetCustomerProfileQR">func (*Client) <a href="/src/target/api.go?s=437:535#L10">GetCustomerProfileQR</a>
+					<a class="permalink" href="#Client.GetCustomerProfileQR">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) GetCustomerProfileQR(merchantID, storeID, terminalID <a href="/pkg/builtin/#string">string</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetCustomerProfileQR : Get Customer Profile (QR)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.GetMMsdk">func (*Client) <a href="/src/target/client.go?s=3589:3645#L150">GetMMsdk</a>
+					<a class="permalink" href="#Client.GetMMsdk">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) GetMMsdk(db *<a href="/pkg/database/sql/">sql</a>.<a href="/pkg/database/sql/#DB">DB</a>) *<a href="#MatahariMall">MatahariMall</a></pre>
+				<p>
+GetMMsdk : Get Matahari Mall sdk
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Client.VoidTransaction">func (*Client) <a href="/src/target/api.go?s=2316:2418#L90">VoidTransaction</a>
+					<a class="permalink" href="#Client.VoidTransaction">&#xb6;</a>
+				</h3>
+				<pre>func (client *<a href="#Client">Client</a>) VoidTransaction(customerID, transactionID <a href="/pkg/builtin/#string">string</a>, params <a href="#Params">Params</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+VoidTransaction : Void Push To Pay / Scan To Pay Transaction
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="CustomerOvo">type <a href="/src/target/type.go?s=660:867#L29">CustomerOvo</a>
+				<a class="permalink" href="#CustomerOvo">&#xb6;</a>
+			</h2>
+			<pre>type CustomerOvo struct {
+    CustomerID <a href="/pkg/builtin/#int64">int64</a>
+    OvoID      <a href="/pkg/builtin/#string">string</a>
+    OvoPhone   <a href="/pkg/builtin/#string">string</a>
+    OvoAuthID  <a href="/pkg/builtin/#string">string</a>
+    FgVerified <a href="/pkg/builtin/#int">int</a>
+    CreatedAt  *<a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>
+    UpdatedAt  *<a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>
+    Source     <a href="/pkg/builtin/#string">string</a>
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="MatahariMall">type <a href="/src/target/type.go?s=254:347#L8">MatahariMall</a>
+				<a class="permalink" href="#MatahariMall">&#xb6;</a>
+			</h2>
+			<pre>type MatahariMall struct {
+    DB      *<a href="/pkg/database/sql/">sql</a>.<a href="/pkg/database/sql/#DB">DB</a>
+    Api     *<a href="#Client">Client</a>
+    OvoInfo *<a href="#CustomerOvo">CustomerOvo</a>
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="MatahariMall.CheckOvoStatus">func (*MatahariMall) <a href="/src/target/mm.go?s=6420:6481#L248">CheckOvoStatus</a>
+					<a class="permalink" href="#MatahariMall.CheckOvoStatus">&#xb6;</a>
+				</h3>
+				<pre>func (c *<a href="#MatahariMall">MatahariMall</a>) CheckOvoStatus(customerID <a href="/pkg/builtin/#int64">int64</a>) <a href="/pkg/builtin/#error">error</a></pre>
+				<p>
+CheckOvoStatus : Checking ovo status by customer id
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="MatahariMall.ValidateOvoIDAndAuthenticateToOvo">func (*MatahariMall) <a href="/src/target/mm.go?s=3059:3141#L128">ValidateOvoIDAndAuthenticateToOvo</a>
+					<a class="permalink" href="#MatahariMall.ValidateOvoIDAndAuthenticateToOvo">&#xb6;</a>
+				</h3>
+				<pre>func (c *<a href="#MatahariMall">MatahariMall</a>) ValidateOvoIDAndAuthenticateToOvo(ovoReq *<a href="#OvoRequest">OvoRequest</a>) <a href="/pkg/builtin/#error">error</a></pre>
+				<p>
+ValidateOvoIDAndAuthenticateToOvo : Validate Customer by phone number and customer id, will push notification to customer device and open “Input Security Code” screen.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="OvoError">type <a href="/src/target/type.go?s=1643:1696#L63">OvoError</a>
+				<a class="permalink" href="#OvoError">&#xb6;</a>
+			</h2>
+			<pre>type OvoError struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="OvoError.Error">func (*OvoError) <a href="/src/target/err.go?s=27:60#L1">Error</a>
+					<a class="permalink" href="#OvoError.Error">&#xb6;</a>
+				</h3>
+				<pre>func (e *<a href="#OvoError">OvoError</a>) Error() <a href="/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="OvoRequest">type <a href="/src/target/type.go?s=414:658#L17">OvoRequest</a>
+				<a class="permalink" href="#OvoRequest">&#xb6;</a>
+			</h2>
+			<pre>type OvoRequest struct {
+    CustomerID    <a href="/pkg/builtin/#int64">int64</a>
+    OvoID         <a href="/pkg/builtin/#string">string</a>
+    Phone         <a href="/pkg/builtin/#string">string</a>
+    AuthID        <a href="/pkg/builtin/#string">string</a>
+    AuthStatus    <a href="/pkg/builtin/#int">int</a>
+    TransactionID <a href="/pkg/builtin/#string">string</a>
+    TerminalId    <a href="/pkg/builtin/#string">string</a>
+    FgVerified    <a href="/pkg/builtin/#int">int</a>
+    Source        <a href="/pkg/builtin/#string">string</a>
+}</pre>
+			<p>
+OvoRequest : Request OVO params
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="OvoResponse">type <a href="/src/target/type.go?s=869:975#L40">OvoResponse</a>
+				<a class="permalink" href="#OvoResponse">&#xb6;</a>
+			</h2>
+			<pre>type OvoResponse struct {
+    Status  <a href="/pkg/builtin/#int">int</a>
+    Data    <a href="#OvoResponseData">OvoResponseData</a>
+    Message <a href="/pkg/builtin/#string">string</a>
+    Code    <a href="/pkg/builtin/#int">int</a>
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="OvoResponseData">type <a href="/src/target/type.go?s=977:1641#L47">OvoResponseData</a>
+				<a class="permalink" href="#OvoResponseData">&#xb6;</a>
+			</h2>
+			<pre>type OvoResponseData struct {
+    AuthenticationID <a href="/pkg/builtin/#string">string</a> `json:&#34;authentication_id&#34;`
+    LoyaltyID        <a href="/pkg/builtin/#string">string</a> `json:&#34;loyalty_id&#34;`
+    Fullname         <a href="/pkg/builtin/#string">string</a> `json:&#34;fullname&#34;`
+    Birthdate        <a href="/pkg/builtin/#string">string</a> `json:&#34;birthdate&#34;`
+    Phone            <a href="/pkg/builtin/#string">string</a> `json:&#34;phone&#34;`
+    Email            <a href="/pkg/builtin/#string">string</a> `json:&#34;email&#34;`
+    Level            <a href="/pkg/builtin/#string">string</a> `json:&#34;level&#34;`
+    CustomerFullname <a href="/pkg/builtin/#string">string</a> `json:&#34;customer_fullname&#34;`
+    CustomerPhone    <a href="/pkg/builtin/#string">string</a> `json:&#34;customer_phone&#34;`
+    OrderID          <a href="/pkg/builtin/#string">string</a> `json:&#34;order_id&#34;`
+    VoucherCode      <a href="/pkg/builtin/#string">string</a> `json:&#34;voucher_code&#34;`
+    ApprovalCode     <a href="/pkg/builtin/#string">string</a> `json:&#34;approval_code&#34;`
+    MerchantInvoice  <a href="/pkg/builtin/#string">string</a> `json:&#34;merchant_invoice&#34;`
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Params">type <a href="/src/target/type.go?s=349:378#L14">Params</a>
+				<a class="permalink" href="#Params">&#xb6;</a>
+			</h2>
+			<pre>type Params map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a></pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
