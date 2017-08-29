@@ -1,3 +1,7 @@
+Installation:
+
+go get github.com/kh411d/ovo
+
 How To:
 
     import (
