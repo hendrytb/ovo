@@ -1,0 +1,20 @@
+How To:
+
+    baseURL := "https://xxxxxxxxxx/loyalty-back"
+    apiKey := "xxxxxxxxxxxxxxxxxxxxxxx"
+    appID := "xxxxxxxxx"
+    merchantID := "x"
+
+    //Create OVO Client
+    ovoClient := ovo.New(baseURL, apiKey, appID, merchantID)
+
+    //Get MM SDK
+    mmsdk := ovoClient.GetMMsdk(db)
+
+    ovoReq := &ovo.OvoRequest{
+        CustomerID: 12345,
+        Phone:      "0812345353",
+    }
+
+    err := mmsdk.ValidateOvoIDAndAuthenticateToOvo(ovoReq)
+
