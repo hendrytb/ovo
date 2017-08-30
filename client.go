@@ -137,15 +137,15 @@ func (client *Client) getURL(name string, params ...string) (string, error) {
     return url, nil
 }
 
-func (client *Client) getResponse(data []byte) (OvoResponse, error) {
-    var r OvoResponse
+func (client *Client) getResponse(data []byte) (Response, error) {
+    var r Response
     err := json.Unmarshal(data, &r)
 
     if err != nil {
         //Enforce data to OvoResponseData, because of inconsistent data type
         if v, ok := err.(*json.UnmarshalTypeError); ok {
             if v.Field == "Data" {
-                r.Data = OvoResponseData{}
+                r.Data = ResponseData{}
                 return r, nil
             }
         }
@@ -160,6 +160,6 @@ func (client *Client) getResponse(data []byte) (OvoResponse, error) {
 func (client *Client) GetMMsdk(db *sql.DB) *MatahariMall {
     return &MatahariMall{
         DB:  db,
-        Api: client,
+        API: client,
     }
 }

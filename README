@@ -24,7 +24,7 @@ How To:
         //Get MM SDK
         mmsdk := ovoClient.GetMMsdk(db)
 
-        ovoReq := &ovo.OvoRequest{
+        ovoReq := &ovo.Request{
             CustomerID: 12345,
             Phone:      "0812345353",
         }

@@ -2,13 +2,13 @@ package ovo
 
 import "fmt"
 
-func (e *OvoError) Error() string {
+func (e *CustomError) Error() string {
     return fmt.Sprintf("%s", e.msg)
 }
 
 //GetErrCode : Get OVO error code
 func GetErrCode(e error) int {
-    if ae, ok := e.(*OvoError); ok {
+    if ae, ok := e.(*CustomError); ok {
         return ae.code
     }
     return 0

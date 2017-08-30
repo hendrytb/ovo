@@ -15,27 +15,30 @@ type Client struct {
     Hmac       string
 }
 
+//MatahariMall : Type for MatahariMall sdk
 type MatahariMall struct {
     DB      *sql.DB
-    Api     *Client
+    API     *Client
     OvoInfo *CustomerOvo
 }
 
+//Params : Type for api parameters
 type Params map[string]string
 
-//OvoRequest : Request OVO params
-type OvoRequest struct {
+//Request : Type request OVO
+type Request struct {
     CustomerID    int64
     OvoID         string
     Phone         string
     AuthID        string
     AuthStatus    int
     TransactionID string
-    TerminalId    string
+    TerminalID    string
     FgVerified    int
     Source        string
 }
 
+//CustomerOvo : Type for struct name and field the same as db table
 type CustomerOvo struct {
     CustomerID int64
     OvoID      string
@@ -47,14 +50,16 @@ type CustomerOvo struct {
     Source     string
 }
 
-type OvoResponse struct {
+//Response : Type for Ovo api response
+type Response struct {
     Status  int
-    Data    OvoResponseData
+    Data    ResponseData
     Message string
     Code    int
 }
 
-type OvoResponseData struct {
+//ResponseData : Part of Ovo api response data
+type ResponseData struct {
     AuthenticationID string `json:"authentication_id"`
     LoyaltyID        string `json:"loyalty_id"`
     Fullname         string `json:"fullname"`
@@ -70,7 +75,8 @@ type OvoResponseData struct {
     MerchantInvoice  string `json:"merchant_invoice"`
 }
 
-type OvoError struct {
+//CustomError : Ovo Error handler
+type CustomError struct {
     code int
     msg  string
 }

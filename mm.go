@@ -8,7 +8,7 @@ import (
     "strings"
 )
 
-func (c *MatahariMall) parsePhoneNumber(ovoReq *OvoRequest) error {
+func (c *MatahariMall) parsePhoneNumber(ovoReq *Request) error {
     re := regexp.MustCompile("(0|\\+)([0-9]{5,16})")
     x := re.MatchString(ovoReq.Phone)
 
@@ -25,7 +25,7 @@ func (c *MatahariMall) parsePhoneNumber(ovoReq *OvoRequest) error {
     return nil
 }
 
-func (c *MatahariMall) getOvoInfoFromStorage(ovoReq *OvoRequest) error {
+func (c *MatahariMall) getOvoInfoFromStorage(ovoReq *Request) error {
     cOvo := CustomerOvo{}
 
     var ovoID sql.NullString
@@ -63,7 +63,7 @@ func (c *MatahariMall) getOvoInfoFromStorage(ovoReq *OvoRequest) error {
 
 }
 
-func (c *MatahariMall) isPhoneNumberAlreadyLinkage(ovoReq *OvoRequest) (bool, error) {
+func (c *MatahariMall) isPhoneNumberAlreadyLinkage(ovoReq *Request) (bool, error) {
     var s sql.NullString
     q := `SELECT ovo_phone
             FROM customer_ovo
@@ -132,7 +132,7 @@ func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
     return cID, fgV, nil
 }
 
-func (c *MatahariMall) validateOvoID(ovoReq *OvoRequest) error {
+func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
     var err error
     err = c.parsePhoneNumber(ovoReq)
     if err != nil {
@@ -159,7 +159,7 @@ func (c *MatahariMall) validateOvoID(ovoReq *OvoRequest) error {
 }
 
 //ValidateOvoIDAndAuthenticateToOvo : Validate Customer by phone number and customer id, will push notification to customer device and open “Input Security Code” screen.
-func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *OvoRequest) error {
+func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *Request) error {
     var err error
 
     err = c.validateOvoID(ovoReq)
@@ -190,20 +190,20 @@ func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *OvoRequest) err
     return nil
 }
 
-func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *OvoRequest) error {
+func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *Request) error {
 
     params := Params{
-        "merchant_id": c.Api.MerchantID,
+        "merchant_id": c.API.MerchantID,
         "phone":       ovoReq.Phone,
     }
 
-    data, err := c.Api.CustomerAuthentication(params)
+    data, err := c.API.CustomerAuthentication(params)
     if err != nil {
         return err
     }
 
-    var r OvoResponse
-    r, err = c.Api.getResponse(data)
+    var r Response
+    r, err = c.API.getResponse(data)
     if err != nil {
         return err
     }
@@ -217,10 +217,10 @@ func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *OvoRequest) error {
             c.OvoInfo.FgVerified = 0
             c.OvoInfo.OvoPhone = ovoReq.Phone
         } else {
-            return &OvoError{r.Code, r.Message}
+            return &CustomError{r.Code, r.Message}
         }
     } else {
-        return &OvoError{r.Code, r.Message}
+        return &CustomError{r.Code, r.Message}
     }
 
     return nil
@@ -251,7 +251,7 @@ func (c *MatahariMall) saveToDatabase() error {
                             source
                         )
                       VALUES (?, ?, ?, 0, NOW(), NOW(), ?)`
-            _, errDBInsert := c.DB.Exec(sqlInsert, ovoInfo.CustomerID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, c.Api.AppID)
+            _, errDBInsert := c.DB.Exec(sqlInsert, ovoInfo.CustomerID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, c.API.AppID)
             if errDBInsert != nil {
                 return errDBInsert
             }
@@ -280,7 +280,7 @@ func (c *MatahariMall) saveToDatabase() error {
 
 //CheckOvoStatus : Checking ovo status by customer id
 func (c *MatahariMall) CheckOvoStatus(customerID int64) error {
-    ovoReq := &OvoRequest{
+    ovoReq := &Request{
         CustomerID: customerID,
     }
 
@@ -306,13 +306,13 @@ func (c *MatahariMall) CheckOvoStatus(customerID int64) error {
 }
 
 func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
-    data, err := c.Api.CheckCustomerAuthenticationStatus(c.OvoInfo.OvoAuthID)
+    data, err := c.API.CheckCustomerAuthenticationStatus(c.OvoInfo.OvoAuthID)
     if err != nil {
         return err
     }
 
-    var r OvoResponse
-    r, err = c.Api.getResponse(data)
+    var r Response
+    r, err = c.API.getResponse(data)
     if err != nil {
         return err
     }
@@ -325,6 +325,6 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
         }
     }
 
-    return &OvoError{r.Code, r.Message}
+    return &CustomError{r.Code, r.Message}
 
 }
