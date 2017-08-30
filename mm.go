@@ -86,6 +86,30 @@ func (c *MatahariMall) isPhoneNumberAlreadyLinkage(ovoReq *OvoRequest) (bool, er
     return true, nil
 }
 
+//IsLinkageVerified : Check if customer linkage is already verified
+func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, error) {
+    var s sql.NullString
+    q := `SELECT customer_id
+            FROM customer_ovo
+           WHERE customer_id = ?
+             AND fg_verified = 1`
+
+    err := c.DB.QueryRow(q, customerID).Scan(&s)
+
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return false, nil
+        }
+        return false, err
+    }
+
+    if !s.Valid {
+        return false, nil
+    }
+
+    return true, nil
+}
+
 func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
     var customerID sql.NullInt64
     var fgVerified sql.NullInt64
