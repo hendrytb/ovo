@@ -19,27 +19,28 @@ const (
 )
 
 const (
-    sendingAuthentication = 1
-    //MerchantIDMustNotEmpty : OVO merchant_id must not empty
-    MerchantIDMustNotEmpty = 2
-    //PhoneMustNotEmpty : OVO phone must not empty
-    PhoneMustNotEmpty = 3
-    //CustomerNotFound : OVO customer not found
-    CustomerNotFound = 4
-)
-
-const (
-    //Authenticated : OVO check auth status is authenticated
-    Authenticated = 1
-    //Unauthenticated : OVO check auth status is not authenticated
-    Unauthenticated = 2
-    //AuthIDNotFound : OVO check auth status authentication_id is not found
-    AuthIDNotFound = 3
-)
-
-const (
     //NoErrCode : No Error code is set
     NoErrCode = 0
+
+    sendingAuthentication = 1
+
+    //MerchantIDMustNotEmpty : OVO merchant_id must not empty
+    MerchantIDMustNotEmpty = 2
+
+    //PhoneMustNotEmpty : OVO phone must not empty
+    PhoneMustNotEmpty = 3
+
+    //CustomerNotFound : OVO customer not found
+    CustomerNotFound = 4
+
+    //Authenticated : OVO check auth status is authenticated
+    Authenticated = 1
+
+    //Unauthenticated : OVO check auth status is not authenticated
+    Unauthenticated = 2
+
+    //AuthIDNotFound : OVO check auth status authentication_id is not found
+    AuthIDNotFound = 3
 )
 
 var (

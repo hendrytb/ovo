@@ -279,29 +279,31 @@ func (c *MatahariMall) saveToDatabase() error {
 }
 
 //CheckOvoStatus : Checking ovo status by customer id
-func (c *MatahariMall) CheckOvoStatus(customerID int64) error {
+func (c *MatahariMall) CheckOvoStatus(customerID int64) (*CustomerOvo, error) {
     ovoReq := &Request{
         CustomerID: customerID,
     }
 
     err := c.getOvoInfoFromStorage(ovoReq)
     if err != nil {
-        return errors.New("Cannot load Ovo Info")
+        return nil, errors.New("Cannot load Ovo Info")
     }
 
-    if c.OvoInfo.CustomerID > 0 && c.OvoInfo.FgVerified <= 0 {
+    if c.OvoInfo.CustomerID == 0 {
+        return nil, &CustomError{CustomerNotFound, "Not yet authenticated"}
+    } else if c.OvoInfo.FgVerified <= 0 {
         err = c.getCustomerAuthenticationStatusAtOvo()
         if err != nil {
-            return err
+            return nil, err
         }
 
         err = c.saveToDatabase()
         if err != nil {
-            return err
+            return nil, err
         }
     }
 
-    return nil
+    return c.OvoInfo, nil
 
 }
 

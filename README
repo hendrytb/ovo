@@ -21,8 +21,8 @@ How To:
         //Create OVO Client
         ovoClient := ovo.New(baseURL, apiKey, appID, merchantID)
 
-        //Get MM SDK
-        mmsdk := ovoClient.GetMMsdk(db)
+        //Get MM SDK: pass db conn
+        mmsdk := ovoClient.GetMMsdk(/* *sql.DB */)
 
         ovoReq := &ovo.Request{
             CustomerID: 12345,
