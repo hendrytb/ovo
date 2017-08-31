@@ -1,24 +1,6 @@
 package ovo
 
 const (
-    httpCreated             = 201
-    httpAccepted            = 202
-    httpOk                  = 200
-    httpBadRequest          = 400
-    httpUnauthorized        = 401
-    httpNotFound            = 404
-    httpMethodNotAllowed    = 405
-    httpNotAcceptable       = 406
-    httpRequestTimeout      = 408
-    httpConflict            = 409
-    httpInternalServerError = 500
-    httpNotImplemented      = 501
-    httpBadGateway          = 502
-    httpServiceUnavailable  = 503
-    httpGatewayTimeout      = 504
-)
-
-const (
     //NoErrCode : No Error code is set
     NoErrCode = 0
 

@@ -4,6 +4,7 @@ import (
     "database/sql"
     "errors"
     "fmt"
+    "net/http"
     "regexp"
     "strings"
 )
@@ -208,7 +209,7 @@ func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *Request) error {
         return err
     }
 
-    if r.Status == httpCreated {
+    if r.Status == http.StatusCreated {
         if r.Code == sendingAuthentication {
             ovoReq.AuthID = r.Data.AuthenticationID
             ovoReq.AuthStatus = r.Code
@@ -319,7 +320,7 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
         return err
     }
 
-    if r.Status == httpOk {
+    if r.Status == http.StatusOK {
         if r.Code == Authenticated {
             c.OvoInfo.OvoID = r.Data.LoyaltyID
             c.OvoInfo.FgVerified = 1
