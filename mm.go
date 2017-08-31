@@ -9,7 +9,7 @@ import (
 )
 
 func (c *MatahariMall) parsePhoneNumber(ovoReq *Request) error {
-    re := regexp.MustCompile("(0|\\+)([0-9]{5,16})")
+    re := regexp.MustCompile(PhoneValidRegex)
     x := re.MatchString(ovoReq.Phone)
 
     if x {

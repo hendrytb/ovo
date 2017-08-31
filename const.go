@@ -43,6 +43,11 @@ const (
     AuthIDNotFound = 3
 )
 
+const (
+    //PhoneValidRegex : Regex to check if phone is valid
+    PhoneValidRegex = "(0|\\+)([0-9]{5,16})"
+)
+
 var (
     domainMap = map[string]string{
         "customer_profile":               "/customers/:customer_id",                                                   //GET
