@@ -74,6 +74,11 @@ func (client *Client) sendRequest(request *http.Request) (response *http.Respons
         return
     }
 
+    if response.StatusCode >= http.StatusInternalServerError {
+        err = errors.New("service currently not available.")
+        return
+    }
+
     buf := &bytes.Buffer{}
     _, err = io.Copy(buf, response.Body)
     response.Body.Close()
@@ -143,11 +148,9 @@ func (client *Client) getResponse(data []byte) (Response, error) {
 
     if err != nil {
         //Enforce data to OvoResponseData, because of inconsistent data type
-        if v, ok := err.(*json.UnmarshalTypeError); ok {
-            if v.Field == "Data" {
-                r.Data = ResponseData{}
-                return r, nil
-            }
+        if _, ok := err.(*json.UnmarshalTypeError); ok {
+            r.Data = ResponseData{}
+            return r, nil
         }
         return r, err
     }
