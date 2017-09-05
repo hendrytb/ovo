@@ -123,7 +123,10 @@ func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
     var customerID sql.NullInt64
     var fgVerified sql.NullInt64
 
-    q := `SELECT customer_id, fg_verified FROM customer_ovo WHERE ovo_phone = ? LIMIT 1`
+    q := `SELECT customer_id,
+                 fg_verified
+            FROM customer_ovo
+            WHERE ovo_phone = ? LIMIT 1`
 
     err := c.DB.QueryRow(q, phone).Scan(&customerID, &fgVerified)
 
