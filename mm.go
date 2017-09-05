@@ -9,6 +9,14 @@ import (
     "strings"
 )
 
+//GetMMsdk : Get Matahari Mall sdk
+func (client *Client) GetMMsdk(db *sql.DB) *MatahariMall {
+    return &MatahariMall{
+        DB:  db,
+        API: client,
+    }
+}
+
 func (c *MatahariMall) parsePhoneNumber(ovoReq *Request) error {
     re := regexp.MustCompile(PhoneValidRegex)
     x := re.MatchString(ovoReq.Phone)

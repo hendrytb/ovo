@@ -79,7 +79,7 @@ func (client *Client) sendRequest(request *http.Request) (response *http.Respons
         return
     }
 
-    buf := &bytes.Buffer{}
+    buf := &bytes.Buffer{}c
     _, err = io.Copy(buf, response.Body)
     response.Body.Close()
 
@@ -157,12 +157,4 @@ func (client *Client) getResponse(data []byte) (Response, error) {
 
     return r, nil
 
-}
-
-//GetMMsdk : Get Matahari Mall sdk
-func (client *Client) GetMMsdk(db *sql.DB) *MatahariMall {
-    return &MatahariMall{
-        DB:  db,
-        API: client,
-    }
 }
