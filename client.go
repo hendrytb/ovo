@@ -4,9 +4,7 @@ import (
     "bytes"
     "crypto/hmac"
     "crypto/sha256"
-    "database/sql"
     "encoding/json"
-    "errors"
     "fmt"
     "io"
     "net/http"
@@ -26,12 +24,22 @@ func New(baseURL, apiKey, appID, merchantID string) *Client {
         AppID:      appID,
         MerchantID: merchantID,
         Random:     random,
+        LocaleID:   "en",
     }
 
     c.setAuthorizationKey()
 
     return c
 
+}
+
+//SetLocale : Setting locale for translation
+func (client *Client) SetLocale(localeID string) {
+    client.LocaleID = localeID
+}
+
+func (client *Client) setErrMessage(data map[string]map[string]string) {
+    ErrMessage = data
 }
 
 func (client *Client) setAuthorizationKey() {
@@ -50,7 +58,6 @@ func (client *Client) newRequest(method string, url string, body *bytes.Buffer) 
     } else {
         req, err = http.NewRequest(method, url, body)
     }
-
     if err != nil {
         return nil, err
     }
@@ -68,23 +75,21 @@ func (client *Client) newRequest(method string, url string, body *bytes.Buffer) 
 
 func (client *Client) sendRequest(request *http.Request) (response *http.Response, data []byte, err error) {
     response, err = http.DefaultClient.Do(request)
-
     if err != nil {
-        err = fmt.Errorf("cannot reach server. %v", err)
+        err = TErr("ovo_unavailable_service", client.LocaleID)
         return
     }
 
     if response.StatusCode >= http.StatusInternalServerError {
-        err = errors.New("service currently not available.")
+        err = TErr("ovo_unavailable_service", client.LocaleID)
         return
     }
 
-    buf := &bytes.Buffer{}c
+    buf := &bytes.Buffer{}
     _, err = io.Copy(buf, response.Body)
     response.Body.Close()
-
     if err != nil {
-        err = fmt.Errorf("cannot read response. %v", err)
+        err = TErr("ovo_invalid_response", client.LocaleID)
     }
 
     data = buf.Bytes()
@@ -125,12 +130,12 @@ func (client *Client) getURL(name string, params ...string) (string, error) {
     re := regexp.MustCompile(":[a-zA-Z0-9_]+")
     vars := re.FindAllString(domainMap[name], -1)
     if len(params) != len(vars) {
-        return "", errors.New("Incomplete parameters request")
+        return "", TErr("ovo_unidentified_request", client.LocaleID)
     }
 
     path, ok := domainMap[name]
     if !ok {
-        return "", errors.New("Unknown url name")
+        return "", TErr("ovo_unidentified_request", client.LocaleID)
     }
     counter := 0
     for _, v := range vars {

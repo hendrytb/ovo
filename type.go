@@ -13,6 +13,7 @@ type Client struct {
     MerchantID string
     Random     string
     Hmac       string
+    LocaleID   string
 }
 
 //MatahariMall : Type for MatahariMall sdk

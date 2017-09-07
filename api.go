@@ -172,7 +172,6 @@ func (client *Client) CustomerAuthentication(params Params) ([]byte, error) {
 //CheckCustomerAuthenticationStatus : Check Customer Authentication Status
 func (client *Client) CheckCustomerAuthenticationStatus(authenticationID string) ([]byte, error) {
     url, err := client.getURL("customer_authentication_status", authenticationID)
-
     if err != nil {
         return nil, err
     }

@@ -2,7 +2,6 @@ package ovo
 
 import (
     "database/sql"
-    "errors"
     "fmt"
     "net/http"
     "regexp"
@@ -20,11 +19,10 @@ func (client *Client) GetMMsdk(db *sql.DB) *MatahariMall {
 func (c *MatahariMall) parsePhoneNumber(ovoReq *Request) error {
     re := regexp.MustCompile(PhoneValidRegex)
     x := re.MatchString(ovoReq.Phone)
-
     if x {
         ovoReq.Phone = strings.Replace(ovoReq.Phone, "+", "", 2)
     } else {
-        return errors.New("Invalid phone number")
+        return TErr("ovo_id_invalid", c.API.LocaleID)
     }
 
     if ovoReq.Phone[0:2] == "62" {
@@ -123,19 +121,15 @@ func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
     var customerID sql.NullInt64
     var fgVerified sql.NullInt64
 
-    q := `SELECT customer_id,
-                 fg_verified
-            FROM customer_ovo
-            WHERE ovo_phone = ? LIMIT 1`
+    q := `SELECT customer_id, fg_verified FROM customer_ovo WHERE ovo_phone = ? LIMIT 1`
 
     err := c.DB.QueryRow(q, phone).Scan(&customerID, &fgVerified)
-
     if err != nil {
         return 0, 0, err
     }
 
     if !customerID.Valid || !fgVerified.Valid {
-        return 0, 0, errors.New("Customer not found")
+        return 0, 0, TErr("ovo_customer_unidentified", c.API.LocaleID)
     }
 
     fgV := int(fgVerified.Int64)
@@ -155,13 +149,12 @@ func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
     if err != nil {
         return err
     }
-
     if c.OvoInfo.FgVerified > 0 {
         if c.OvoInfo.OvoPhone == ovoReq.Phone {
-            return errors.New("Already verified")
+            return TErr("ovo_already_verified", c.API.LocaleID)
         }
 
-        return errors.New("Cannot change OVO id that has been verified")
+        return TErr("ovo_change_verified", c.API.LocaleID)
 
     } else if c.OvoInfo.OvoPhone != ovoReq.Phone {
         c.OvoInfo.OvoPhone = ovoReq.Phone
@@ -186,7 +179,7 @@ func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *Request) error 
     }
 
     if isLinked {
-        return errors.New("Phone Number already used by other customer")
+        return TErr("ovo_id_used", c.API.LocaleID)
     }
 
     err = c.doCustomerAuthenticationAtOvo(ovoReq)
@@ -241,7 +234,7 @@ func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *Request) error {
 func (c *MatahariMall) saveToDatabase() error {
 
     if c.OvoInfo == nil {
-        return errors.New("Ovo Information not found")
+        return TErr("ovo_unknown_info", c.API.LocaleID)
     }
 
     ovoInfo := c.OvoInfo
@@ -267,6 +260,8 @@ func (c *MatahariMall) saveToDatabase() error {
             if errDBInsert != nil {
                 return errDBInsert
             }
+        } else {
+            return err
         }
     } else {
         fmt.Println("UPDATE OVO CUSTOMER")
@@ -284,6 +279,9 @@ func (c *MatahariMall) saveToDatabase() error {
                                 WHERE customer_id = ?`
         _, errDBUpdate := c.DB.Exec(sqlUpdate, ovoID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, ovoInfo.FgVerified, ovoInfo.CustomerID)
         if errDBUpdate != nil {
+            if strings.Contains(errDBUpdate.Error(), "1062") {
+                return TErr("ovo_id_used", c.API.LocaleID)
+            }
             return errDBUpdate
         }
     }
@@ -295,14 +293,12 @@ func (c *MatahariMall) CheckOvoStatus(customerID int64) (*CustomerOvo, error) {
     ovoReq := &Request{
         CustomerID: customerID,
     }
-
     err := c.getOvoInfoFromStorage(ovoReq)
     if err != nil {
-        return nil, errors.New("Cannot load Ovo Info")
+        return nil, TErr("ovo_unknown_info", c.API.LocaleID)
     }
-
     if c.OvoInfo.CustomerID == 0 {
-        return nil, &CustomError{CustomerNotFound, "Not yet authenticated"}
+        return nil, TErr("ovo_not_authenticated", c.API.LocaleID)
     } else if c.OvoInfo.FgVerified <= 0 {
         err = c.getCustomerAuthenticationStatusAtOvo()
         if err != nil {
@@ -324,7 +320,6 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
     if err != nil {
         return err
     }
-
     var r Response
     r, err = c.API.getResponse(data)
     if err != nil {
@@ -339,6 +334,10 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
         }
     }
 
-    return &CustomError{r.Code, r.Message}
+    if r.Code == Unauthenticated || r.Code == AuthIDNotFound || r.Code == CustomerNotFound {
+        return TErr("ovo_retry_verification", c.API.LocaleID)
+    }
+
+    return err
 
 }
