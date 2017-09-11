@@ -277,12 +277,15 @@ func (c *MatahariMall) saveToDatabase() error {
                                   fg_verified = ?,
                                   updated_at = NOW()
                                 WHERE customer_id = ?`
-        _, errDBUpdate := c.DB.Exec(sqlUpdate, ovoID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, ovoInfo.FgVerified, ovoInfo.CustomerID)
+        resUpdate, errDBUpdate := c.DB.Exec(sqlUpdate, ovoID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, ovoInfo.FgVerified, ovoInfo.CustomerID)
         if errDBUpdate != nil {
             if strings.Contains(errDBUpdate.Error(), "1062") {
                 return TErr("ovo_id_used", c.API.LocaleID)
             }
             return errDBUpdate
+        }
+        if rowAffected, _ := resUpdate.RowsAffected(); rowAffected == 0 {
+            return TErr("ovo_id_used", c.API.LocaleID)
         }
     }
     return nil
