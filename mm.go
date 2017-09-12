@@ -102,7 +102,6 @@ func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, error) {
              AND fg_verified = 1`
 
     err := c.DB.QueryRow(q, customerID).Scan(&s)
-    fmt.Printf("ini err %#v\n", err)
     if err != nil {
         if err == sql.ErrNoRows {
             return false, nil
