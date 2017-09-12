@@ -107,7 +107,7 @@ func TestNewRequest(t *testing.T) {
 
 func TestGetResponse(t *testing.T) {
     client := new(Client)
-    response, err := client.getResponse([]byte("[]"))
+    _, err := client.getResponse([]byte("[]"))
     if err != nil {
         t.Errorf("this should not be error")
     }

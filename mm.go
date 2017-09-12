@@ -102,7 +102,7 @@ func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, error) {
              AND fg_verified = 1`
 
     err := c.DB.QueryRow(q, customerID).Scan(&s)
-
+    fmt.Printf("ini err %#v\n", err)
     if err != nil {
         if err == sql.ErrNoRows {
             return false, nil
@@ -127,7 +127,6 @@ func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
     if err != nil {
         return 0, 0, err
     }
-
     if !customerID.Valid || !fgVerified.Valid {
         return 0, 0, TErr("ovo_customer_unidentified", c.API.LocaleID)
     }
