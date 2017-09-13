@@ -8,6 +8,7 @@ import (
     "fmt"
     "io"
     "net/http"
+    "net/http/httptest"
     "net/url"
     "regexp"
     "strings"
@@ -62,6 +63,15 @@ func (client *Client) newRequest(method string, url string, body *bytes.Buffer) 
         return nil, err
     }
 
+    //Override request
+    if client.httpHandler != nil {
+        if body == nil {
+            req = httptest.NewRequest(method, url, nil)
+        } else {
+            req = httptest.NewRequest(method, url, body)
+        }
+    }
+
     if method == "POST" || method == "PUT" {
         req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
     }
@@ -70,11 +80,23 @@ func (client *Client) newRequest(method string, url string, body *bytes.Buffer) 
     req.Header.Add("random", client.Random)
     req.Header.Add("hmac", client.Hmac)
 
+    //Setup ResponseWriter recorder
+    if client.httpHandler != nil {
+        client.wRes = httptest.NewRecorder()
+        client.httpHandler(client.wRes, req)
+    }
+
     return req, nil
 }
 
 func (client *Client) sendRequest(request *http.Request) (response *http.Response, data []byte, err error) {
-    response, err = http.DefaultClient.Do(request)
+
+    if client.httpHandler != nil {
+        response = client.wRes.Result()
+    } else {
+        response, err = http.DefaultClient.Do(request)
+    }
+
     if err != nil {
         err = TErr("ovo_unavailable_service", client.LocaleID)
         return

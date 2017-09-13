@@ -2,7 +2,6 @@ package ovo
 
 import (
     "database/sql"
-    "fmt"
     "net/http"
     "regexp"
     "strings"
@@ -78,7 +77,6 @@ func (c *MatahariMall) isPhoneNumberAlreadyLinkage(ovoReq *Request) (bool, error
               AND ovo_id != '' LIMIT 1`
 
     err := c.DB.QueryRow(q, ovoReq.Phone).Scan(&s)
-
     if err != nil {
         if err == sql.ErrNoRows {
             return false, nil
@@ -151,7 +149,6 @@ func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
         if c.OvoInfo.OvoPhone == ovoReq.Phone {
             return TErr("ovo_already_verified", c.API.LocaleID)
         }
-
         return TErr("ovo_change_verified", c.API.LocaleID)
 
     } else if c.OvoInfo.OvoPhone != ovoReq.Phone {
@@ -242,7 +239,6 @@ func (c *MatahariMall) saveToDatabase() error {
 
     if err != nil {
         if err == sql.ErrNoRows {
-            fmt.Println("CREATE NEW OVO CUSTOMER")
             sqlInsert := `INSERT INTO
                         customer_ovo(
                             customer_id,
@@ -262,7 +258,6 @@ func (c *MatahariMall) saveToDatabase() error {
             return err
         }
     } else {
-        fmt.Println("UPDATE OVO CUSTOMER")
         var ovoID sql.NullString
         if ovoInfo.OvoID != "" {
             ovoID.String = ovoInfo.OvoID

@@ -2,6 +2,8 @@ package ovo
 
 import (
     "database/sql"
+    "net/http"
+    "net/http/httptest"
     "time"
 )
 
@@ -14,6 +16,10 @@ type Client struct {
     Random     string
     Hmac       string
     LocaleID   string
+
+    //For testing purpose
+    httpHandler func(http.ResponseWriter, *http.Request)
+    wRes        *httptest.ResponseRecorder
 }
 
 //MatahariMall : Type for MatahariMall sdk

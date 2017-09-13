@@ -4,6 +4,7 @@ import (
     "crypto/hmac"
     "crypto/sha256"
     "fmt"
+    "net/http"
     "regexp"
     "testing"
 )
@@ -111,4 +112,24 @@ func TestGetResponse(t *testing.T) {
     if err != nil {
         t.Errorf("this should not be error")
     }
+}
+
+func TestExecRequest503(t *testing.T) {
+
+    client := new(Client)
+    client.LocaleID = "en"
+    client.httpHandler = func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusServiceUnavailable)
+        //w.Write([]byte("<html><body>Hello World!</body></html>"))
+        //io.WriteString(w, "<html><body>Hello World!</body></html>")
+    }
+
+    _, err := client.execRequest("GET", "http://apapunitu.com", nil)
+    if err == nil {
+        t.Errorf("Should error when service 503")
+    }
+    if err != nil && err.Error() != TErr("ovo_unavailable_service", client.LocaleID).Error() {
+        t.Errorf("Should return Err: " + TErr("ovo_unavailable_service", client.LocaleID).Error())
+    }
+
 }
