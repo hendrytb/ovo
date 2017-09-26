@@ -80,6 +80,9 @@ type ResponseData struct {
     VoucherCode      string `json:"voucher_code"`
     ApprovalCode     string `json:"approval_code"`
     MerchantInvoice  string `json:"merchant_invoice"`
+    PointTotal       string `json:"point_total"`
+    PointEarned      string `json:"point_earned"`
+    PointID          string `json:"point_id"`
 }
 
 //CustomError : Ovo Error handler

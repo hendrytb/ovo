@@ -2,6 +2,8 @@ package ovo
 
 import (
     "database/sql"
+    "errors"
+    "log"
     "net/http"
     "regexp"
     "strings"
@@ -332,6 +334,47 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
 
     if r.Code == Unauthenticated || r.Code == AuthIDNotFound || r.Code == CustomerNotFound {
         return TErr("ovo_retry_verification", c.API.LocaleID)
+    }
+
+    return err
+
+}
+
+//CalculateHyperOvoPoint : Calculate Ovo Point for Hyper only
+func (c *MatahariMall) CalculateHyperOvoPoint(customerID int64, param Params) error {
+
+    oreq := &Request{
+        CustomerID: customerID,
+    }
+
+    if err := c.getOvoInfoFromStorage(oreq); err != nil {
+        return err
+    }
+
+    if c.OvoInfo.OvoID == "" {
+        return TErr("ovo_unknown_info", "en")
+    }
+
+    data, err := c.API.CalculatePoints(c.OvoInfo.OvoID, param)
+    if err != nil {
+        return err
+    }
+    var r Response
+    r, err = c.API.getResponse(data)
+    if err != nil {
+        return err
+    }
+
+    if r.Status == http.StatusOK {
+        log.Printf("%#v", r.Data)
+        return nil
+    }
+
+    if r.Code != Success {
+        /*if r.Code == DuplicateMerchantInvoice {
+            return nil
+        }*/
+        return errors.New(r.Message)
     }
 
     return err

@@ -23,6 +23,18 @@ const (
 
     //AuthIDNotFound : OVO check auth status authentication_id is not found
     AuthIDNotFound = 3
+
+    //Success : Success code from ovo api
+    Success = 1
+
+    //AmountMustNotNegative : Amount must not be negative
+    AmountMustNotNegative = 7
+
+    //DuplicateMerchantInvoice : Duplicate merchant invoice api error
+    DuplicateMerchantInvoice = 8
+
+    //LoyaltyAccountDisabled : Loyalty account is disabled
+    LoyaltyAccountDisabled = 11
 )
 
 const (
