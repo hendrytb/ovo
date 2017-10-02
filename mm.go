@@ -2,6 +2,7 @@ package ovo
 
 import (
     "database/sql"
+    "encoding/json"
     "errors"
     "log"
     "net/http"
@@ -371,12 +372,47 @@ func (c *MatahariMall) CalculateHyperOvoPoint(customerID int64, param Params) er
     }
 
     if r.Code != Success {
-        /*if r.Code == DuplicateMerchantInvoice {
+        if r.Code == DuplicateMerchantInvoice {
             return nil
-        }*/
+        }
         return errors.New(r.Message)
     }
 
     return err
 
+}
+
+//AddOvoPointHistory : Add Ovo Point History
+func (c *MatahariMall) AddOvoPointHistory(customerID, orderID int64, soNumber, pointType string, payload Params, flags ...map[string]interface{}) error {
+    jsonPayload, err := json.Marshal(payload)
+    if err != nil {
+        return err
+    }
+
+    var fgFailed interface{}
+    fgFailed = 0
+
+    if len(flags) > 0 {
+        flag := flags[0]
+        if val, ok := flag["fg_failed"]; ok {
+            fgFailed = val
+        }
+    }
+
+    sqlInsert := `INSERT INTO
+                        ovo_points(
+                            customer_id,
+                            order_id,
+                            so_number,
+                            type,
+                            payload,
+                            fg_failed
+                        )
+                      VALUES (?, ?, ?, ?, ?, ?)`
+    _, errDBInsert := c.DB.Exec(sqlInsert, customerID, orderID, soNumber, pointType, jsonPayload, fgFailed)
+    if errDBInsert != nil {
+        return errDBInsert
+    }
+
+    return nil
 }
