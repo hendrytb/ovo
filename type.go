@@ -27,6 +27,7 @@ type MatahariMall struct {
     DB      *sql.DB
     API     *Client
     OvoInfo *CustomerOvo
+    OvoReq  *Request
 }
 
 //Params : Type for api parameters

@@ -4,10 +4,12 @@ import (
     "database/sql"
     "encoding/json"
     "errors"
+    "fmt"
     "log"
     "net/http"
     "regexp"
     "strings"
+    "time"
 )
 
 //GetMMsdk : Get Matahari Mall sdk
@@ -60,7 +62,6 @@ func (c *MatahariMall) getOvoInfoFromStorage(ovoReq *Request) error {
     }
 
     c.OvoInfo = &cOvo
-
     if err != nil {
         if err == sql.ErrNoRows {
             return nil
@@ -139,10 +140,11 @@ func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
 
 func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
     var err error
-    err = c.parsePhoneNumber(ovoReq)
-    if err != nil {
-        return err
-    }
+    /* Not to validate phone number
+       err = c.parsePhoneNumber(ovoReq)
+       if err != nil {
+           return err
+       }*/
 
     err = c.getOvoInfoFromStorage(ovoReq)
     if err != nil {
@@ -154,8 +156,6 @@ func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
         }
         return TErr("ovo_change_verified", c.API.LocaleID)
 
-    } else if c.OvoInfo.OvoPhone != ovoReq.Phone {
-        c.OvoInfo.OvoPhone = ovoReq.Phone
     }
 
     return nil
@@ -165,19 +165,22 @@ func (c *MatahariMall) validateOvoID(ovoReq *Request) error {
 func (c *MatahariMall) ValidateOvoIDAndAuthenticateToOvo(ovoReq *Request) error {
     var err error
 
+    c.OvoReq = ovoReq
+
     err = c.validateOvoID(ovoReq)
     if err != nil {
         return err
     }
 
-    var isLinked bool
-    isLinked, err = c.isPhoneNumberAlreadyLinkage(ovoReq)
-    if err != nil {
-        return err
+    cuid, fgVerified, _ := c.getCustomerOvoByPhone(c.OvoReq.Phone)
+    //If existed customer by phone and customer doesn't match then stop process
+    if cuid > 0 && cuid != c.OvoReq.CustomerID {
+        return TErr("ovo_id_used", c.API.LocaleID)
     }
 
-    if isLinked {
-        return TErr("ovo_id_used", c.API.LocaleID)
+    //if existed customer by phone and customer is verified then stop process
+    if cuid > 0 && fgVerified > 0 {
+        return TErr("ovo_already_verified", c.API.LocaleID)
     }
 
     err = c.doCustomerAuthenticationAtOvo(ovoReq)
@@ -216,9 +219,7 @@ func (c *MatahariMall) doCustomerAuthenticationAtOvo(ovoReq *Request) error {
             ovoReq.AuthID = r.Data.AuthenticationID
             ovoReq.AuthStatus = r.Code
             c.OvoInfo.OvoAuthID = r.Data.AuthenticationID
-            c.OvoInfo.CustomerID = ovoReq.CustomerID
             c.OvoInfo.FgVerified = 0
-            c.OvoInfo.OvoPhone = ovoReq.Phone
         } else {
             return &CustomError{r.Code, r.Message}
         }
@@ -236,13 +237,17 @@ func (c *MatahariMall) saveToDatabase() error {
     }
 
     ovoInfo := c.OvoInfo
+    var newLinkage bool
 
-    //Check if exist by phone
-    _, _, err := c.getCustomerOvoByPhone(ovoInfo.OvoPhone)
+    //If there is no record found and customer is a new one
+    if ovoInfo.CustomerID == 0 {
+        newLinkage = true
+        ovoInfo.CustomerID = c.OvoReq.CustomerID
+        ovoInfo.OvoPhone = c.OvoReq.Phone
+    }
 
-    if err != nil {
-        if err == sql.ErrNoRows {
-            sqlInsert := `INSERT INTO
+    if newLinkage {
+        sqlInsert := `INSERT INTO
                         customer_ovo(
                             customer_id,
                             ovo_phone,
@@ -253,37 +258,60 @@ func (c *MatahariMall) saveToDatabase() error {
                             source
                         )
                       VALUES (?, ?, ?, 0, NOW(), NOW(), ?)`
-            _, errDBInsert := c.DB.Exec(sqlInsert, ovoInfo.CustomerID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, c.API.AppID)
-            if errDBInsert != nil {
-                return errDBInsert
-            }
-        } else {
-            return err
+        _, errDBInsert := c.DB.Exec(sqlInsert, ovoInfo.CustomerID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, c.API.AppID)
+        if errDBInsert != nil {
+            return errDBInsert
         }
     } else {
         var ovoID sql.NullString
+
         if ovoInfo.OvoID != "" {
             ovoID.String = ovoInfo.OvoID
             ovoID.Valid = true
         }
-        sqlUpdate := `UPDATE customer_ovo SET
-                                  ovo_id = ?,
-                                  ovo_phone = ?,
-                                  ovo_auth_id = ?,
-                                  fg_verified = ?,
-                                  updated_at = NOW()
-                                WHERE customer_id = ?`
-        resUpdate, errDBUpdate := c.DB.Exec(sqlUpdate, ovoID, ovoInfo.OvoPhone, ovoInfo.OvoAuthID, ovoInfo.FgVerified, ovoInfo.CustomerID)
-        if errDBUpdate != nil {
-            if strings.Contains(errDBUpdate.Error(), "1062") {
-                return TErr("ovo_id_used", c.API.LocaleID)
-            }
-            return errDBUpdate
+        toUpdate := map[string]interface{}{
+            "ovo_id":      ovoID,
+            "ovo_auth_id": ovoInfo.OvoAuthID,
+            "fg_verified": ovoInfo.FgVerified,
         }
-        if rowAffected, _ := resUpdate.RowsAffected(); rowAffected == 0 {
+        fmt.Println(c.OvoReq)
+        if ovoInfo.OvoPhone != c.OvoReq.Phone {
+            fmt.Println("ga sama woi")
+            toUpdate["ovo_phone"] = c.OvoReq.Phone
+        }
+
+        return c.updateCustomerOVO(ovoInfo.CustomerID, toUpdate)
+    }
+    return nil
+}
+
+func (c *MatahariMall) updateCustomerOVO(customerID interface{}, toUpdate map[string]interface{}) error {
+    sqlUpdate := `UPDATE customer_ovo SET updated_at = NOW() `
+    var setStr []string
+    var vals []interface{}
+    for k, v := range toUpdate {
+        setStr = append(setStr, k+" = ?")
+        vals = append(vals, v)
+    }
+    if len(setStr) > 0 {
+        sqlUpdate = sqlUpdate + "," + strings.Join(setStr, ",") + " "
+    }
+
+    vals = append(vals, customerID)
+    sqlUpdate += " WHERE customer_id = ?"
+    res, err := c.DB.Exec(sqlUpdate, vals...)
+
+    if err != nil {
+        if strings.Contains(err.Error(), "1062") {
             return TErr("ovo_id_used", c.API.LocaleID)
         }
+        return err
     }
+
+    if rowAffected, _ := res.RowsAffected(); rowAffected == 0 {
+        return TErr("ovo_id_used", c.API.LocaleID)
+    }
+
     return nil
 }
 
@@ -292,10 +320,12 @@ func (c *MatahariMall) CheckOvoStatus(customerID int64) (*CustomerOvo, error) {
     ovoReq := &Request{
         CustomerID: customerID,
     }
+    c.OvoReq = ovoReq
     err := c.getOvoInfoFromStorage(ovoReq)
     if err != nil {
         return nil, TErr("ovo_unknown_info", c.API.LocaleID)
     }
+    c.OvoReq.Phone = c.OvoInfo.OvoPhone
     if c.OvoInfo.CustomerID == 0 {
         return nil, TErr("ovo_not_authenticated", c.API.LocaleID)
     } else if c.OvoInfo.FgVerified <= 0 {
@@ -415,4 +445,21 @@ func (c *MatahariMall) AddOvoPointHistory(customerID, orderID int64, soNumber, p
     }
 
     return nil
+}
+
+//AddBgLinkage : Background linkage
+func (c *MatahariMall) AddBgLinkage(ovoReq *Request, verifiedTime time.Duration) {
+    go func() {
+        time.Sleep(time.Second * 5)
+        if err := c.ValidateOvoIDAndAuthenticateToOvo(ovoReq); err != nil {
+            return
+        }
+        //Wait user action on the ovo app before verifying
+        time.Sleep(time.Second * verifiedTime)
+        //Verified the auth id
+        _, err := c.CheckOvoStatus(ovoReq.CustomerID)
+        if err != nil {
+            return
+        }
+    }()
 }

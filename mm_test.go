@@ -52,8 +52,6 @@ func TestSaveToDatabaseUpdate(t *testing.T) {
     }
     defer db.Close()
 
-    rows := sqlmock.NewRows([]string{"customer_id", "fg_verified"}).AddRow(1, 0)
-    mock.ExpectQuery(`SELECT customer_id, fg_verified`).WillReturnRows(rows)
     mock.ExpectExec(`UPDATE customer_ovo`).WillReturnResult(sqlmock.NewResult(0, 0))
 
     client := new(Client)
@@ -61,15 +59,17 @@ func TestSaveToDatabaseUpdate(t *testing.T) {
     mmsdk := client.GetMMsdk(db)
     mmsdk.OvoInfo = &CustomerOvo{
         CustomerID: 1234,
+        OvoID:      "",
         OvoPhone:   "08282828",
         OvoAuthID:  "234",
         FgVerified: 0,
     }
+    mmsdk.OvoReq = &Request{
+        CustomerID: 1234,
+        Phone:      "08282828",
+    }
 
     err = mmsdk.saveToDatabase()
-    if err == nil {
-        t.Errorf("Should return error if no row affected")
-    }
     if err != nil && err.Error() != TErr("ovo_id_used", client.LocaleID).Error() {
         t.Errorf("Should error ovo id used, if no row affected")
     }
@@ -82,17 +82,18 @@ func TestSaveToDatabaseInsert(t *testing.T) {
     }
     defer db.Close()
 
-    mock.ExpectQuery(`SELECT customer_id, fg_verified`).WillReturnError(sql.ErrNoRows)
     mock.ExpectExec(`INSERT INTO customer_ovo`).WillReturnResult(sqlmock.NewResult(1, 1))
 
     client := new(Client)
     client.LocaleID = "en"
     mmsdk := client.GetMMsdk(db)
     mmsdk.OvoInfo = &CustomerOvo{
-        CustomerID: 1234,
-        OvoPhone:   "08282828",
+        CustomerID: 0,
         OvoAuthID:  "234",
         FgVerified: 0,
+    }
+    mmsdk.OvoReq = &Request{
+        Phone: "08282828",
     }
 
     err = mmsdk.saveToDatabase()
@@ -240,7 +241,7 @@ func TestValidateOvoIDAndAuthenticateToOvoLinkage(t *testing.T) {
     }
     defer db.Close()
 
-    rows := sqlmock.NewRows([]string{"customer_id", "ovo_id", "ovo_phone", "ovo_auth_id", "fg_verified"}).AddRow(12345, "6789", "08080808", "123", 0)
+    rows := sqlmock.NewRows([]string{"customer_id", "ovo_id", "ovo_phone", "ovo_auth_id", "fg_verified"}).AddRow(12345, "6789", "08080808", "123", 1)
     mock.ExpectQuery(`SELECT customer_id`).WillReturnRows(rows)
 
     rowsOvophone := sqlmock.NewRows([]string{"ovo_phone"}).AddRow("08080808")
@@ -256,12 +257,9 @@ func TestValidateOvoIDAndAuthenticateToOvoLinkage(t *testing.T) {
     mmsdk := client.GetMMsdk(db)
 
     err = mmsdk.ValidateOvoIDAndAuthenticateToOvo(ovoReq)
-    if err == nil {
-        t.Errorf("This should return error when already linkage")
-    }
 
-    if err != nil && err.Error() != TErr("ovo_id_used", client.LocaleID).Error() {
-        t.Errorf("This should return Err: " + TErr("ovo_id_used", client.LocaleID).Error())
+    if err != nil && err.Error() != TErr("ovo_already_verified", client.LocaleID).Error() {
+        t.Errorf("This should return Err: " + TErr("ovo_already_verified", client.LocaleID).Error())
     }
 }
 
@@ -274,7 +272,6 @@ func TestValidateOvoIDAndAuthenticateToOvoSuccessUpdate(t *testing.T) {
 
     rows := sqlmock.NewRows([]string{"customer_id", "ovo_id", "ovo_phone", "ovo_auth_id", "fg_verified"}).AddRow(12345, "6789", "08080808", "123", 0)
     mock.ExpectQuery(`SELECT customer_id, ovo_id, ovo_phone, ovo_auth_id, fg_verified`).WillReturnRows(rows)
-    mock.ExpectQuery(`SELECT ovo_phone FROM customer_ovo`).WillReturnError(sql.ErrNoRows)
 
     mock.ExpectQuery(`SELECT customer_id, fg_verified FROM customer_ovo`).WillReturnRows(sqlmock.NewRows([]string{"customer_id", "fg_verified"}).AddRow(12345, 0))
     mock.ExpectExec(`UPDATE customer_ovo`).WillReturnResult(sqlmock.NewResult(0, 1))
@@ -313,9 +310,7 @@ func TestValidateOvoIDAndAuthenticateToOvoSuccessInsert(t *testing.T) {
     }
     defer db.Close()
 
-    rows := sqlmock.NewRows([]string{"customer_id", "ovo_id", "ovo_phone", "ovo_auth_id", "fg_verified"}).AddRow(12345, "6789", "08080808", "123", 0)
-    mock.ExpectQuery(`SELECT customer_id, ovo_id, ovo_phone, ovo_auth_id, fg_verified`).WillReturnRows(rows)
-    mock.ExpectQuery(`SELECT ovo_phone FROM customer_ovo`).WillReturnError(sql.ErrNoRows)
+    mock.ExpectQuery(`SELECT customer_id, ovo_id, ovo_phone, ovo_auth_id, fg_verified`).WillReturnError(sql.ErrNoRows)
 
     mock.ExpectQuery(`SELECT customer_id, fg_verified FROM customer_ovo`).WillReturnError(sql.ErrNoRows)
     mock.ExpectExec(`INSERT`).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -379,7 +374,6 @@ func TestCheckOvoStatusSuccess(t *testing.T) {
     rows := sqlmock.NewRows([]string{"customer_id", "ovo_id", "ovo_phone", "ovo_auth_id", "fg_verified"}).AddRow(12345, "6789", "08080808", "123", 0)
     mock.ExpectQuery(`SELECT customer_id, ovo_id, ovo_phone, ovo_auth_id, fg_verified`).WillReturnRows(rows)
 
-    mock.ExpectQuery(`SELECT customer_id, fg_verified FROM customer_ovo`).WillReturnRows(sqlmock.NewRows([]string{"customer_id", "fg_verified"}).AddRow(12345, 0))
     mock.ExpectExec(`UPDATE customer_ovo`).WillReturnResult(sqlmock.NewResult(0, 1))
 
     client := new(Client)
@@ -396,7 +390,6 @@ func TestCheckOvoStatusSuccess(t *testing.T) {
         w.Write([]byte(data))
     }
     mmsdk := client.GetMMsdk(db)
-
     _, errs := mmsdk.CheckOvoStatus(12345)
     if errs != nil {
         t.Errorf("Should not return error upon success")
