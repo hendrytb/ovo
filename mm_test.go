@@ -2,6 +2,7 @@ package ovo
 
 import (
     "database/sql"
+    "fmt"
     "net/http"
     "testing"
 
@@ -19,7 +20,7 @@ func TestIsLinkageVerified(t *testing.T) {
 
     client := new(Client)
     mmsdk := client.GetMMsdk(db)
-    _, err = mmsdk.IsLinkageVerified(123456)
+    _, _, err = mmsdk.IsLinkageVerified(123456)
     if err != nil {
         t.Errorf("Err No Rows should be nil")
     }
@@ -161,17 +162,18 @@ func TestIsLinkageVerifiedNotValid(t *testing.T) {
     defer db.Close()
 
     rows := sqlmock.NewRows([]string{"customer_id"}).AddRow(nil)
-    mock.ExpectQuery(`SELECT customer_id FROM customer_ovo`).WillReturnRows(rows)
+    mock.ExpectQuery(`SELECT ovo_id FROM customer_ovo`).WillReturnRows(rows)
 
     client := new(Client)
     client.LocaleID = "en"
     mmsdk := client.GetMMsdk(db)
 
-    ok, erro := mmsdk.IsLinkageVerified(12345)
+    ok, _, erro := mmsdk.IsLinkageVerified(12345)
     if ok {
         t.Errorf("This should not ok if customer_id not valid")
     }
     if erro != nil {
+        fmt.Println(erro)
         t.Errorf("This should not error")
     }
 }

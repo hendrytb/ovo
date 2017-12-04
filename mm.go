@@ -96,9 +96,10 @@ func (c *MatahariMall) isPhoneNumberAlreadyLinkage(ovoReq *Request) (bool, error
 }
 
 //IsLinkageVerified : Check if customer linkage is already verified
-func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, error) {
+func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, string, error) {
     var s sql.NullString
-    q := `SELECT customer_id
+    var ovoID string
+    q := `SELECT ovo_id
             FROM customer_ovo
            WHERE customer_id = ?
              AND fg_verified = 1`
@@ -106,16 +107,48 @@ func (c *MatahariMall) IsLinkageVerified(customerID int64) (bool, error) {
     err := c.DB.QueryRow(q, customerID).Scan(&s)
     if err != nil {
         if err == sql.ErrNoRows {
-            return false, nil
+            return false, ovoID, nil
         }
-        return false, err
+        return false, ovoID, err
     }
 
     if !s.Valid {
-        return false, nil
+        return false, ovoID, nil
     }
 
-    return true, nil
+    if s.Valid {
+        ovoID = s.String
+    }
+
+    return true, ovoID, nil
+}
+
+//IsLinkageVerifiedByPhone : Check if customer linkage is already verified by phone
+func (c *MatahariMall) IsLinkageVerifiedByPhone(phone string) (bool, string, error) {
+    var s sql.NullString
+    var ovoID string
+    q := `SELECT ovo_id
+            FROM customer_ovo
+           WHERE ovo_phone = ?
+             AND fg_verified = 1`
+
+    err := c.DB.QueryRow(q, phone).Scan(&s)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return false, ovoID, nil
+        }
+        return false, ovoID, err
+    }
+
+    if !s.Valid {
+        return false, ovoID, nil
+    }
+
+    if s.Valid {
+        ovoID = s.String
+    }
+
+    return true, ovoID, nil
 }
 
 func (c *MatahariMall) getCustomerOvoByPhone(phone string) (int64, int, error) {
@@ -372,27 +405,16 @@ func (c *MatahariMall) getCustomerAuthenticationStatusAtOvo() error {
 }
 
 //CalculateHyperOvoPoint : Calculate Ovo Point for Hyper only
-func (c *MatahariMall) CalculateHyperOvoPoint(customerID int64, param Params) error {
+func (c *MatahariMall) CalculateHyperOvoPoint(ovoID string, param Params) error {
 
-    oreq := &Request{
-        CustomerID: customerID,
-    }
-
-    if err := c.getOvoInfoFromStorage(oreq); err != nil {
-        return err
-    }
-
-    if c.OvoInfo.OvoID == "" {
-        return TErr("ovo_unknown_info", "en")
-    }
-
-    data, err := c.API.CalculatePoints(c.OvoInfo.OvoID, param)
+    data, err := c.API.CalculatePoints(ovoID, param)
     if err != nil {
         return err
     }
     var r Response
     r, err = c.API.getResponse(data)
     if err != nil {
+        fmt.Printf("Err CalculateHyperOvoPoint %v \n", err)
         return err
     }
 
@@ -400,7 +422,7 @@ func (c *MatahariMall) CalculateHyperOvoPoint(customerID int64, param Params) er
         log.Printf("%#v", r.Data)
         return nil
     }
-
+    fmt.Printf("Response CalculateHyperOvoPoint %v \n", r)
     if r.Code != Success {
         if r.Code == DuplicateMerchantInvoice {
             return nil
